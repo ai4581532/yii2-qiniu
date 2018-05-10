@@ -8,25 +8,32 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
+    
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'RBdIkFhP8HNP75vbJBHYzc62-OiRTVmp',
+            //'enableCsrfValidation' => FALSE
         ],
+        
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
+        
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             // send all mails to a file by default. You have to set
@@ -34,6 +41,7 @@ $config = [
             // for the mailer to send real emails.
             'useFileTransport' => true,
         ],
+        
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -51,6 +59,10 @@ $config = [
             'showScriptName' => false,
             'rules' => [
             ],
+        ],
+        
+        'QiniuOSS' => [
+            'class' => 'app\components\QiniuOSS',
         ],
         
     ],

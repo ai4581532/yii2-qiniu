@@ -31,9 +31,3 @@ tests/_support/_generated
 
 #vagrant folder
 /.vagrant
-
-#config  ignore
-config/db.php
-config/params.php
-
-
