@@ -102,7 +102,7 @@ class QiniuController extends Controller{
         
         $policy =$qiniu->getCallbackPolicy();
         
-        $token = $qiniu->getToken(null, 3600, $policy);
+        $token = $qiniu->getToken($policy, 3600, null);
         
         $result["data"] = $token;
         
@@ -124,7 +124,8 @@ class QiniuController extends Controller{
         $qiniu = new QiniuOSS();
         
         $policy = $qiniu->getReturnBodyPolicy();
-        $token = $qiniu->getToken(null, 3600, $policy);
+        
+        $token = $qiniu->getToken($policy, 3600, null);
         
         $res = $qiniu->upload($token, $key, $filePath);
  

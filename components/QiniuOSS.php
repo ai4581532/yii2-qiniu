@@ -18,7 +18,7 @@ class QiniuOSS extends Component{
     
     private static $auth;
     
-    private static $callbackUrl = "http://yju565.natappfree.cc/basic/web/index.php/qiniu/uploadcallback";
+    private static $callbackUrl = "http://ppshny.natappfree.cc/basic/web/index.php/qiniu/uploadcallback";
     private static $callbackBody = "filename=$(fname)&filesize=$(fsize)&key=$(key)&hash=$(etag)&mimeType=$(mimeType)&w=$(imageInfo.width)&h=$(imageInfo.height)";
     private static $returnBody = '{"filename":$(fname),"filesize":$(fsize),"key":$(key),"hash":$(etag),"mimeType":$(mimeType),"w":$(imageInfo.width),"h":$(imageInfo.height)}';
     
@@ -36,20 +36,38 @@ class QiniuOSS extends Component{
         
     }
     
+    /**
+     * 获取auth
+     * @return \Qiniu\Auth
+     */
     public function getAuth(){
         return self::$auth;
     }
     
+    /**
+     * 获取buckets列表
+     * @return \Qiniu\Storage\string[]
+     */
     public function getBuckets(){
         $bucketManager = new BucketManager(self::$auth);
         return $bucketManager->buckets();
     }
     
+    /**
+     * 获取buckets绑定domains
+     * @return \Qiniu\Storage\string[]
+     */
     public function getDomains(){
         $bucketManager = new BucketManager(self::$auth);
         return $bucketManager->domains(self::$bucket);
     }
     
+    /**
+     * 获取回调上传的策略
+     * @param unknown $callbackUrl
+     * @param unknown $callbackBody
+     * @return string[]|mixed[]
+     */
     public function getCallbackPolicy($callbackUrl=null,$callbackBody=null){
         
         $policy = array(
@@ -60,6 +78,11 @@ class QiniuOSS extends Component{
         return $policy;
     }
     
+    /**
+     * 获取带返回值的上传策略
+     * @param unknown $returnBody
+     * @return string[]
+     */
     public function getReturnBodyPolicy($returnBody=null){
         
         $policy = array(
@@ -69,46 +92,84 @@ class QiniuOSS extends Component{
         return $policy;
     }
     
-    public function getToken($key = null, $expires = 3600, $policy = null){
+    /**
+     * 获取上传token
+     * @param unknown $policy
+     * @param number $expires
+     * @param unknown $key
+     * @return string
+     */
+    public function getToken($policy = null, $expires = 3600, $key = null){
         
         $token = self::$auth->uploadToken(self::$bucket, $key, $expires, $policy);
         
         return $token;
     }
     
-    public function upload($token,$key=null,$filePath){
+    /**
+     * 上传文件
+     * @param unknown $token 
+     * @param unknown $key 文件保存名
+     * @param unknown $filePath
+     * @return number[]|string[]|unknown[]|array[]
+     */
+    public function upload($token, $key=null, $filePath){
         $uploadMgr = new UploadManager();
-        
-        // 调用 UploadManager 的 putFile 方法进行文件的上传。
+   
         list($ret, $err) = $uploadMgr->putFile($token, $key, $filePath);
         
+        $result = array("success"=>1,"data"=>"");
+        
         if ($err !== null) {
-            return $err;
+            $result["success"]=0;
+            $result["data"]=$err;
+            //return $err;
         } else {
-            return $ret;
+            $result["data"]=$ret;
+            //return $ret;
         }
         
+        return $result;
     }
     
+    /**
+     * 验证是否七牛云回调
+     * @param unknown $contentType
+     * @param unknown $authorization
+     * @param unknown $callbackBody
+     * @return number[]|string[]
+     */
     public function verifyCallback($contentType, $authorization, $callbackBody){
         
         $isQiniuCallback = self::$auth->verifyCallback($contentType, $authorization, self::$callbackUrl, $callbackBody);
         
         if ($isQiniuCallback) {
-            $resp = array('ret' => 'success');
+            $result = array("success"=>1,"data"=>"");
         } else {
-            $resp = array('ret' => 'failed');
+            $result = array("success"=>0,"data"=>"");
         }
         
-        return $resp;
+        return $result;
     }
     
+    /**
+     * 获取私有下载地址
+     * @param unknown $baseUrl
+     * @param number $expires
+     * @return string
+     */
     public function getPrivateDownloadUrl($baseUrl, $expires = 3600){
         return self::$auth->privateDownloadUrl($baseUrl, $expires);
     }
     
+    /**
+     * 列举bucket中的文件
+     * @param string $prefix
+     * @param string $marker
+     * @param number $limit
+     * @return array
+     */
     public function getFileList($prefix= '', $marker= '', $limit= 100){
-        
         $bucketManager = new BucketManager(self::$auth);
  
         $delimiter = "/";
@@ -127,6 +188,8 @@ class QiniuOSS extends Component{
            
             return $ret;
         }
+        
+        
     }
     
     public function getFileInfo($key){
@@ -189,15 +252,9 @@ class QiniuOSS extends Component{
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
         
-        //每次最多不能超过1000个
-//         $keys = array(
-//             'qiniu.mp4',
-//             'qiniu.png',
-//             'qiniu.jpg'
-//         );
-        
         $ops = $bucketManager->buildBatchDelete(self::$bucket, $keys);
         list($ret, $err) = $bucketManager->batch($ops);
+        
         if ($err) {
             print_r($err);
         } else {

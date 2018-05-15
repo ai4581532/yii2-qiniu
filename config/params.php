@@ -4,9 +4,9 @@ return [
     'adminEmail' => 'admin@example.com',
     
     //qiniu-sdk
-    'qiniu-accessKey'=>'6_zOdm1JaEMSx9sHpPgxG8AkqbvfjXIf4HXMZ0ce',
-    'qiniu-secretKey'=>'17wa815iXpMd3LxbYsTF8vVaVKVCdq5jKkw3ztxY',
-    'qiniu-bucket'=>'tuchuang',
-    'qiniu-callbackUrl'=>'http://yju565.natappfree.cc/basic/web/index.php/qiniu/uploadcallback',
+    'qiniu-accessKey'=>'bysXxZxahQzA3C-nbtymUee5g4dzDrMUnHv8Tefn',
+    'qiniu-secretKey'=>'GzryqQrMYL8ybyj6ugfP2WtBhtUPZGAJ8ccAh-cA',
+    'qiniu-bucket'=>'freebucket',
+    'qiniu-callbackUrl'=>'http://ppshny.natappfree.cc/basic/web/index.php/qiniu/uploadcallback',
     
 ];
