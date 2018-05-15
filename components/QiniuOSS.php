@@ -29,7 +29,7 @@ class QiniuOSS extends Component{
         self::$accessKey = Yii::$app->params['qiniu-accessKey'];
         self::$secretKey = Yii::$app->params['qiniu-secretKey'];
         self::$bucket = Yii::$app->params['qiniu-bucket'];
-         
+        
         self::$auth = new Auth(self::$accessKey , self::$secretKey);
         
         self::$callbackUrl = Yii::$app->params['qiniu-callbackUrl'];
@@ -115,21 +115,14 @@ class QiniuOSS extends Component{
      */
     public function upload($token, $key=null, $filePath){
         $uploadMgr = new UploadManager();
-   
         list($ret, $err) = $uploadMgr->putFile($token, $key, $filePath);
         
-        $result = array("success"=>1,"data"=>"");
-        
         if ($err !== null) {
-            $result["success"]=0;
-            $result["data"]=$err;
-            //return $err;
+            return array("success"=>0,"data"=>$err);
         } else {
-            $result["data"]=$ret;
-            //return $ret;
+            return array("success"=>1,"data"=>$ret);
         }
-        
-        return $result;
+ 
     }
     
     /**
@@ -171,38 +164,43 @@ class QiniuOSS extends Component{
      */
     public function getFileList($prefix= '', $marker= '', $limit= 100){
         $bucketManager = new BucketManager(self::$auth);
- 
         $delimiter = "/";
-        
-        // 列举文件
         list($ret, $err) = $bucketManager->listFiles(self::$bucket, $prefix, $marker, $limit, $delimiter);
         
         if ($err !== null) {
-            
-            return $err;
-            
+            return array("success"=>0,"data"=>$err);
         } else {
-            if (array_key_exists('marker', $ret)) {
-                $marker = $ret["marker"];
-            }
-           
-            return $ret;
+//             if (array_key_exists('marker', $ret)) {
+//                 $marker = $ret["marker"];
+//             }
+            return array("success"=>1,"data"=>$ret);
         }
-        
-        
     }
     
+    /**
+     * 获取文件基本信息
+     * @param unknown $key
+     * @return number[]|array[]
+     */
     public function getFileInfo($key){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
         list($fileInfo, $err) = $bucketManager->stat(self::$bucket, $key);
+        
         if ($err) {
-            print_r($err);
+            return array("success"=>0,"data"=>$err);
         } else {
-            print_r($fileInfo);
+            return array("success"=>1,"data"=>$fileInfo);
         }
+        
     }
     
+    /**
+     * 重命名
+     * @param unknown $srcKey
+     * @param unknown $destKey
+     * @return mixed|NULL[]|\Qiniu\Http\Error[]|array[]|mixed[]
+     */
     public function rename($srcKey,$destKey){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
@@ -212,6 +210,13 @@ class QiniuOSS extends Component{
         return $err;
     }
     
+    /**
+     * 移动文件
+     * @param unknown $srcKey
+     * @param unknown $destBucket
+     * @param unknown $destKey
+     * @return mixed|NULL[]|\Qiniu\Http\Error[]|array[]|mixed[]
+     */
     public function move($srcKey, $destBucket, $destKey){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
@@ -221,6 +226,13 @@ class QiniuOSS extends Component{
         return $err;
     }
     
+    /**
+     * 复制文件
+     * @param unknown $srcKey
+     * @param unknown $destBucket
+     * @param unknown $destKey
+     * @return mixed|NULL[]|\Qiniu\Http\Error[]|array[]|mixed[]
+     */
     public function copy($srcKey, $destBucket, $destKey){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
@@ -230,6 +242,11 @@ class QiniuOSS extends Component{
         return $err;
     }
     
+    /**
+     * 删除文件
+     * @param unknown $key
+     * @return mixed|NULL[]|\Qiniu\Http\Error[]|array[]|mixed[]
+     */
     public function delete($key){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
@@ -239,6 +256,12 @@ class QiniuOSS extends Component{
         return $err;
     }
     
+    /**
+     * 指定多少天后删除文件
+     * @param unknown $key
+     * @param unknown $days
+     * @return \Qiniu\Storage\Mixed
+     */
     public function deleteAfterDays($key, $days){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
@@ -248,17 +271,23 @@ class QiniuOSS extends Component{
         return $err;
     }
     
+    /**
+     * 批量删除
+     * @param unknown $keys
+     * @return number[]|array[]
+     */
     public function deleteBatch($keys){
         $config = new Config();
         $bucketManager = new BucketManager(self::$auth, $config);
         
         $ops = $bucketManager->buildBatchDelete(self::$bucket, $keys);
+        
         list($ret, $err) = $bucketManager->batch($ops);
         
         if ($err) {
-            print_r($err);
+            return array("success"=>0,"data"=>$err);
         } else {
-            print_r($ret);
+            return array("success"=>1,"data"=>$ret);
         }
     }
     
